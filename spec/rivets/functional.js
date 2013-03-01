@@ -170,6 +170,48 @@ describe('Functional', function() {
       })
 
     });
+
+    describe('Template', function() {
+      it('can bind recursively', function() {
+        var treeRoot = new TreeNode({
+          name: 'root',
+          children: [
+            new TreeNode({
+            name: 'child',
+            children: [
+              new TreeNode({
+              name: 'grandchild'
+            })
+            ]
+          })
+          ]
+        });
+        el.setAttribute('data-template', 'root:template');
+        rivets.bind(el, {root: treeRoot});
+        expect(el.innerHTML).toBe(
+          '<span data-text="model.name">root</span>' +
+          '<ul data-show="model.length" style="display: none;">' + 
+            '<!-- rivets: each-child -->' +
+            '<li>' +
+              '<div class="node" data-template="child:template">' +
+                '<span data-text="model.name">child</span>' +
+                '<ul data-show="model.length" style="display: none;">' + 
+                  '<!-- rivets: each-child -->' +
+                  '<li>' +
+                    '<div class="node" data-template="child:template">' +
+                      '<span data-text="model.name">grandchild</span>' +
+                      '<ul data-show="model.length" style="display: none;">' + 
+                        '<!-- rivets: each-child -->' +
+                      '</ul>' +
+                    '</div>' +
+                  '</li>' +
+                '</ul>' +
+              '</div>' +
+            '</li>' +
+          '</ul>'
+        );
+      });
+    });
   });
 
   describe('Updates', function() {

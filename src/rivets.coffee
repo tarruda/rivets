@@ -31,6 +31,8 @@ class Rivets.Binding
 
     @formatters = @options.formatters || []
 
+    @childViews = []
+
   # Applies all the current formatters to the supplied value and returns the
   # formatted value.
   formattedValue: (value) =>
@@ -106,6 +108,10 @@ class Rivets.Binding
 
   # Unsubscribes from the model and the element.
   unbind: =>
+    # unbind all child views
+    for view in @childViews
+      view.unbind()
+
     @binder.unbind?.call @, @el
 
     unless @options.bypass
@@ -360,6 +366,10 @@ Rivets.binders =
         "#{el.className} #{@args[0]}"
       else
         elClass.replace(" #{@args[0]} ", ' ').trim()
+
+  template: (el, value) ->
+    el.innerHTML = value
+    @childViews.push rivets.bind(el, model: @model)
 
   "*": (el, value) ->
     if value
