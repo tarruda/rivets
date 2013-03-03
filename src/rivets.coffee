@@ -365,24 +365,30 @@ Rivets.binders =
         elClass.replace(" #{@args[0]} ", ' ').trim()
 
   template:
+    bind: ->
+      @childViews = []
     routine: (el, value) ->
       el.innerHTML = value
-      @childView.unbind() if @childView
-      @childView = rivets.bind(el, model: @model)
+      view.unbind() for view in @childViews
+      data = {}
+      data[n] = m for n, m of @view.models
+      data.model = @model
+      for childNode in el.childNodes when childNode.nodeType is 1
+        @childViews.push rivets.bind(childNode, data)
     unbind: (el) ->
-      el.innerHTML = ''
-      if @childView
-        @childView.unbind()
+      for view in @childViews
+        view.unbind()
         # this should make things easier for stupid garbage
         # collectors(eg: IE)
-        for binding in @childView.bindings
+        for binding in view.bindings
           binding.model = null
           binding.el = null
           binding.options = null
-        @childView.bindings = null
-        @childView.models = null
-        @childView.els = null
-      @childView = null
+        view.bindings = null
+        view.models = null
+        view.els = null
+      @childViews = []
+      el.innerHTML = ''
 
   "*": (el, value) ->
     if value
