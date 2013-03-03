@@ -31,8 +31,6 @@ class Rivets.Binding
 
     @formatters = @options.formatters || []
 
-    @childViews = []
-
   # Applies all the current formatters to the supplied value and returns the
   # formatted value.
   formattedValue: (value) =>
@@ -108,9 +106,6 @@ class Rivets.Binding
 
   # Unsubscribes from the model and the element.
   unbind: =>
-    # unbind all child views
-    for view in @childViews
-      view.unbind()
 
     @binder.unbind?.call @, @el
 
@@ -328,6 +323,8 @@ Rivets.binders =
     routine: (el, value) ->
       unbindEvent el, @args[0], @currentListener if @currentListener
       @currentListener = bindEvent el, @args[0], value, @model
+    unbind: (el) ->
+      unbindEvent el, @args[0], @currentListener if @currentListener
 
   "each-*":
     block: true
@@ -367,9 +364,25 @@ Rivets.binders =
       else
         elClass.replace(" #{@args[0]} ", ' ').trim()
 
-  template: (el, value) ->
-    el.innerHTML = value
-    @childViews.push rivets.bind(el, model: @model)
+  template:
+    routine: (el, value) ->
+      el.innerHTML = value
+      @childView.unbind() if @childView
+      @childView = rivets.bind(el, model: @model)
+    unbind: (el) ->
+      el.innerHTML = ''
+      if @childView
+        @childView.unbind()
+        # this should make things easier for stupid garbage
+        # collectors(eg: IE)
+        for binding in @childView.bindings
+          binding.model = null
+          binding.el = null
+          binding.options = null
+        @childView.bindings = null
+        @childView.models = null
+        @childView.els = null
+      @childView = null
 
   "*": (el, value) ->
     if value
