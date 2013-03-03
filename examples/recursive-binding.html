@@ -12,7 +12,7 @@
   </head>
   <body>
 
-    <div id="root" class="node" data-template="root:template"></div>
+    <div id="root" class="node" data-template="model:template"></div>
 
     <script type="text/rivets-template" id="tree-template">
         <span data-text="model:name"></span>
@@ -80,7 +80,7 @@
       });
 
       root = new Node('root');
-      root.view = rivets.bind(document.getElementById('root'), { root: root });
+      root.view = rivets.bind(document.getElementById('root'), { model: root });
     </script>
   </body>
 
