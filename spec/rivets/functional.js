@@ -173,6 +173,7 @@ describe('Functional', function() {
 
     describe('Template', function() {
       it('can bind recursively', function() {
+        var expected, actual;
         var treeRoot = new TreeNode({
           name: 'root',
           children: [
@@ -188,8 +189,7 @@ describe('Functional', function() {
         });
         el.setAttribute('data-template', 'root:template');
         rivets.bind(el, {root: treeRoot});
-        expect(el.innerHTML).toBe(
-          '<span data-text="model.name">root</span>' +
+        expected = '<span data-text="model.name">root</span>' +
           '<ul data-show="model.length" style="display: none;">' + 
             '<!-- rivets: each-child -->' +
             '<li>' +
@@ -208,8 +208,12 @@ describe('Functional', function() {
                 '</ul>' +
               '</div>' +
             '</li>' +
-          '</ul>'
-        );
+          '</ul>';
+        actual = el.innerHTML;
+        // This little hack is needed to make the test pass in phantomjs
+        // since it will put a space after the 'display: none;' string
+        actual = actual.replace(/none;\s"/g, 'none;"');
+        expect(actual).toBe(expected);
       });
     });
   });
